@@ -1,0 +1,100 @@
+# Repository Guidelines
+
+## How to Use This Guide
+
+- Start here for cross-project norms.
+- Each component has its own `AGENTS.md` file with specific guidelines (e.g., `{component}/AGENTS.md`).
+- Component docs override this file when guidance conflicts.
+
+## Available Skills
+
+Use these skills for detailed patterns on-demand:
+
+### Generic Skills
+| Skill | Description | URL |
+|-------|-------------|-----|
+| `typescript` | TypeScript strict patterns and best practices | [SKILL.md](skills/typescript/SKILL.md) |
+| `{skill-name}` | {description} | [SKILL.md](skills/{skill-name}/SKILL.md) |
+
+### Project-Specific Skills
+| Skill | Description | URL |
+|-------|-------------|-----|
+| `{project}-{component}` | {description} | [SKILL.md](skills/{project}-{component}/SKILL.md) |
+
+### Auto-invoke Skills
+
+When performing these actions, ALWAYS invoke the corresponding skill FIRST:
+
+| Action | Skill |
+|--------|-------|
+| Writing TypeScript types/interfaces | `typescript` |
+| Creating new skills | `skill-creator` |
+| After creating/modifying a skill | `skill-sync` |
+| {action description} | `{skill-name}` |
+
+---
+
+## Project Overview
+
+{Brief description of the project}
+
+| Component | Location | Tech Stack |
+|-----------|----------|------------|
+| {component-1} | `{path}/` | {technologies} |
+| {component-2} | `{path}/` | {technologies} |
+
+---
+
+## Development Setup
+
+```bash
+# Clone and install
+git clone {repo-url}
+cd {project-name}
+{install-command}
+
+# Run development server
+{dev-command}
+
+# Run tests
+{test-command}
+```
+
+---
+
+## Code Style & Conventions
+
+### General Rules
+- {Convention 1}
+- {Convention 2}
+- {Convention 3}
+
+### Naming Conventions
+| Entity | Pattern | Example |
+|--------|---------|---------|
+| {entity-type} | `{pattern}` | `{example}` |
+
+---
+
+## Commit & Pull Request Guidelines
+
+Follow conventional-commit style: `<type>[scope]: <description>`
+
+**Types:** `feat`, `fix`, `docs`, `chore`, `perf`, `refactor`, `style`, `test`
+
+### Before Creating a PR
+1. Run all relevant tests and linters
+2. Complete checklist in `.github/pull_request_template.md`
+3. Link screenshots for UI changes (if applicable)
+
+---
+
+## QA Checklist
+
+Before merging, ensure:
+
+- [ ] Tests pass (`{test-command}`)
+- [ ] Linting passes (`{lint-command}`)
+- [ ] Documentation updated (if applicable)
+- [ ] Changelog updated (if applicable)
+- [ ] No new security vulnerabilities introduced

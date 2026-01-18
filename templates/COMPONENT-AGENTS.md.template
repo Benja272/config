@@ -1,0 +1,97 @@
+# {Component} - AI Agent Ruleset
+
+> **Skills Reference**: For detailed patterns, use these skills:
+> - [`{project}-{component}`](../skills/{project}-{component}/SKILL.md) - Component-specific patterns
+> - [`{generic-skill}`](../skills/{generic-skill}/SKILL.md) - Generic patterns
+
+### Auto-invoke Skills
+
+When performing these actions, ALWAYS invoke the corresponding skill FIRST:
+
+| Action | Skill |
+|--------|-------|
+| {action-1} | `{skill-1}` |
+| {action-2} | `{skill-2}` |
+
+---
+
+## CRITICAL RULES - NON-NEGOTIABLE
+
+### {Category 1}
+- ALWAYS: {rule that must always be followed}
+- ALWAYS: {another mandatory rule}
+- NEVER: {rule about what to avoid}
+
+### {Category 2}
+- ALWAYS: {mandatory rule}
+- NEVER: {anti-pattern to avoid}
+- NEVER: {another thing to avoid}
+
+---
+
+## DECISION TREES
+
+### {Decision Category}
+```
+{Condition 1}? -> {Action A}
+{Condition 2}? -> {Action B}
+Otherwise     -> {Default action}
+```
+
+### {Another Decision Category}
+```
+{Question}? -> {Answer}
+```
+
+---
+
+## TECH STACK
+
+{Technology 1} | {Technology 2} | {Technology 3} | {Technology 4}
+
+---
+
+## PROJECT STRUCTURE
+
+```
+{component}/
+├── {folder-1}/           # {description}
+│   ├── {subfolder}/      # {description}
+│   └── {file}            # {description}
+├── {folder-2}/           # {description}
+└── {folder-3}/           # {description}
+```
+
+---
+
+## COMMANDS
+
+```bash
+# Development
+{dev-command}
+
+# Testing
+{test-command}
+
+# Linting
+{lint-command}
+```
+
+---
+
+## QA CHECKLIST
+
+- [ ] {check-1}
+- [ ] {check-2}
+- [ ] {check-3}
+- [ ] {check-4}
+
+---
+
+## NAMING CONVENTIONS
+
+| Entity | Pattern | Example |
+|--------|---------|---------|
+| {entity-1} | `{pattern}` | `{example}` |
+| {entity-2} | `{pattern}` | `{example}` |
+| {entity-3} | `{pattern}` | `{example}` |

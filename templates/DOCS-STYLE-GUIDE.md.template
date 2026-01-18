@@ -1,0 +1,156 @@
+# Documentation Style Guide
+
+## Brand Voice & Tone
+
+{Describe your project's communication style - professional, friendly, technical, etc.}
+
+---
+
+## Inclusive Language
+
+### Avoid Gendered Pronouns
+
+- Use second person for instructions (you/your/yours)
+- Use third-person references (the user, the developer)
+- If gendered pronoun required, use they/them/theirs
+- Avoid double references like she/he, s/he
+
+### Use Gender-Neutral Alternatives
+
+| Avoid | Use Instead |
+|-------|-------------|
+| Businessman | Entrepreneur, executive |
+| Salesman | Sales representative |
+| Mankind | Humanity, people |
+| Middleman | Intermediary |
+
+---
+
+## Technical Writing Guidelines
+
+### Verbal Over Nominal Constructions
+
+Prefer verbal constructions for clarity:
+
+- **Preferred:** "The report was successfully created."
+- **Avoid:** "The creation of the report was successful."
+
+### Second Person Usage
+
+Reserve explicit "you/your" for imperative instructions:
+
+- **Instructions:** "Click the Settings button to open preferences."
+- **Descriptions:** "The system processes requests automatically." (not "your requests")
+
+---
+
+## Formatting Standards
+
+### Title Case for Headers
+
+Use title case for all headers: "This Is an Example Header"
+
+### Hyphenation
+
+Use hyphens for compound modifiers before nouns:
+- "world-leading company" (before noun)
+- "the company is world leading" (after noun - no hyphen)
+
+### Code Formatting
+
+Always specify the language for syntax highlighting:
+
+```{language}
+// Code example
+```
+
+Use backticks for inline code:
+- File names: `config.yaml`
+- Commands: `npm install`
+- Variables: `user_id`
+
+---
+
+## Bullet Points
+
+### When to Use
+
+Use bullet points when:
+- Information can be divided into categories
+- Items are significant standalone concepts
+- Lists improve scannability
+
+### Punctuation
+
+- **No punctuation**: For simple lists without verbs
+- **Periods**: For complete sentences
+- **Headers**: Bold headers improve scannability
+
+**Example with headers:**
+- **Feature A**: Description of feature A
+- **Feature B**: Description of feature B
+
+---
+
+## UI Interaction Verbs
+
+| Action | Platform | Description |
+|--------|----------|-------------|
+| Click | Desktop | Press and release mouse button |
+| Double-click | Desktop | Two quick presses |
+| Right-click | Desktop | Opens context menu |
+| Tap | Mobile | Touch screen interaction |
+| Swipe | Mobile | Slide finger across screen |
+| Drag | Both | Move while holding |
+
+---
+
+## Warnings and Alerts
+
+### Severity Levels
+
+| Level | Use For |
+|-------|---------|
+| **Note** | General information, tips (low severity) |
+| **Warning** | Potential issues if ignored (moderate severity) |
+| **Danger** | Severe consequences possible (high severity) |
+
+### Guidelines
+
+- Always explain consequences
+- Provide remediation steps when possible
+- Keep warnings concise and actionable
+
+**Example:**
+> **Warning:** Disabling encryption may expose sensitive data. See [Security Guide](link) for alternatives.
+
+---
+
+## SEO Considerations
+
+### Sentence Structure
+
+Place keywords at the beginning of sentences:
+
+- **Better:** "To create a new role, open Settings and click Add."
+- **Worse:** "Open Settings and click Add to create a new role."
+
+### Headers
+
+- Include relevant keywords naturally
+- Use structured hierarchy (H1 -> H2 -> H3)
+- Avoid keyword stuffing
+
+---
+
+## Version Badges
+
+When documenting features introduced in specific versions:
+
+```markdown
+## New Feature Name
+
+*Available since v{version}*
+
+Description of the feature...
+```
