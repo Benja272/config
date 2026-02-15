@@ -19,11 +19,9 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 | Action | Skill |
 |--------|-------|
-| Creating new templates | `template-creator` |
-| Creating/modifying skills | `skill-creator` |
-| Updating skill metadata | `skill-sync` |
-| After modifying any skill | `skill-sync` |
-| Writing TypeScript code | `typescript` |
+| Creating documentation | `docs-management` |
+| Modifying docs/ files | `docs-management` |
+| Updating README | `docs-management` |
 
 ---
 

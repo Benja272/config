@@ -111,6 +111,10 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 ./skills/skill-sync/assets/sync.sh --scope ui
 ```
 
+## Usage via MCP
+
+If the `agents-config` MCP server is connected, use the `sync_skills` tool instead of running the script directly. The MCP tool provides the same functionality with `check_only`, `scope`, and `dry_run` options.
+
 ---
 
 ## Checklist After Modifying Skills

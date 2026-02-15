@@ -42,6 +42,10 @@ config/
 │       ├── skill-sync/
 │       └── typescript/
 │
+├── mcp-server/             # MCP server (TypeScript)
+│   ├── src/               # Server source (resources, tools, prompts)
+│   └── tests/             # Unit + integration tests
+│
 ├── examples/               # Real-world examples
 │   └── prowler/           # Prowler security tool example
 │
@@ -123,6 +127,11 @@ make check                # Check if sync needed (for CI)
 
 # Testing
 make test                 # Run all tests
+
+# MCP Server
+make mcp-install          # Install MCP server dependencies
+make mcp-build            # Build TypeScript
+make mcp-test             # Run MCP server tests
 ```
 
 ## Supported Assistants
@@ -135,6 +144,55 @@ make test                 # Run all tests
 | Auto-invoke | Yes | Yes | Yes | No | No |
 
 See [docs/supported-assistants.md](docs/supported-assistants.md) for details.
+
+## MCP Server
+
+The MCP server exposes all config functionality directly to AI assistants via the [Model Context Protocol](https://modelcontextprotocol.io/). Instead of manually running `setup.sh` and `sync.sh`, the agent can call tools like `setup_project`, `create_skill`, and `sync_skills` on its own.
+
+### Installation
+
+```bash
+cd mcp-server && npm install && npm run build
+```
+
+### Register with Claude Code
+
+Add to your `~/.claude.json` or project `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "agents-config": {
+      "command": "node",
+      "args": ["/absolute/path/to/config/mcp-server/dist/index.js"]
+    }
+  }
+}
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `setup_project` | Initialize AI configs in a target project |
+| `create_skill` | Scaffold a new skill from template |
+| `sync_skills` | Sync skill metadata to AGENTS.md auto-invoke tables |
+| `update_project` | Check for and apply config updates |
+| `list_templates` | List available templates |
+| `list_skills` | List available skills with descriptions |
+
+All mutating tools support a `dry_run` parameter.
+
+### Available Resources
+
+Templates, skills, examples, and docs are exposed as read-only resources (e.g. `template://agents-md`, `skill://list`).
+
+### Testing
+
+```bash
+cd mcp-server && npm test                                        # Unit + integration tests
+npx @modelcontextprotocol/inspector node dist/index.js           # Interactive inspector
+```
 
 ## Contributing
 

@@ -151,6 +151,8 @@ After creating the skill, add it to `AGENTS.md`:
 | `{skill-name}` | {Description} | [SKILL.md](skills/{skill-name}/SKILL.md) |
 ```
 
+Then run `sync.sh` to update auto-invoke tables, or use the `sync_skills` MCP tool if the `agents-config` server is connected.
+
 ---
 
 ## Checklist Before Creating
@@ -163,6 +165,7 @@ After creating the skill, add it to `AGENTS.md`:
 - [ ] Code examples are minimal
 - [ ] Commands section exists
 - [ ] Added to AGENTS.md
+- [ ] Ran `sync.sh` or MCP `sync_skills` tool
 
 ## Resources
 

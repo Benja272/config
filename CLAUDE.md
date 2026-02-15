@@ -22,6 +22,12 @@ make check                # Check if in sync (for CI, exits 1 if drift detected)
 make test                 # Run all tests (setup_test.sh + sync_test.sh)
 ./setup_test.sh           # Setup script tests only
 ./templates/skills/skill-sync/assets/sync_test.sh  # Sync tests only
+
+# MCP Server
+cd mcp-server && npm run build    # Build TypeScript
+cd mcp-server && npm run dev      # Dev mode with watch
+cd mcp-server && npm test         # Run tests
+cd mcp-server && npm start        # Start the server
 ```
 
 ## Architecture

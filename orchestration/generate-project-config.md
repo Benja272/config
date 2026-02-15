@@ -39,13 +39,14 @@ Output a structured report with:
 - Existing conventions found
 - Recommended skill categories"
 
-### Phase 2: Root AGENTS.md Generation
+### Phase 2: Root AGENTS.md + Assistant-Specific Files
 
-After reviewing Phase 1 results, spawn a subagent to create the root config:
+After reviewing Phase 1 results, spawn a subagent to create the root config and assistant files:
 
 Task prompt:
-"Create a root AGENTS.md file for this project based on the analysis.
+"Create the AI agent configuration files for this project based on the analysis.
 
+**Step 1 — AGENTS.md (source of truth)**:
 Use this template structure:
 - How to Use This Guide section
 - Available Skills table (list relevant skills from templates/skills/)
@@ -57,7 +58,22 @@ Use this template structure:
 - QA Checklist section
 
 Make it specific to this project's tech stack and structure.
-Write the file to AGENTS.md at the repository root."
+Write the file to AGENTS.md at the repository root.
+
+**Step 2 — CLAUDE.md (Claude Code)**:
+Start from AGENTS.md, then add Claude-specific sections:
+- Task tool usage for spawning subagents (define specialist roles)
+- MCP tool references if agents-config server is connected
+- Skill progressive disclosure notes
+- allowed-tools directives per skill if applicable
+Write to CLAUDE.md at the repository root.
+
+**Step 3 — Other assistant files**:
+- GEMINI.md: Adapt AGENTS.md for Gemini CLI conventions.
+- .cursorrules: Strip skills/subagent references. Inline critical rules. Keep concise.
+- .github/copilot-instructions.md: Strip skills. Focus on conventions and patterns.
+
+Each file should be tailored — NOT identical copies."
 
 ### Phase 3: Component AGENTS.md Generation
 
@@ -120,6 +136,130 @@ After validation, run the setup script:
 ```
 
 This configures all AI assistants (Claude, Gemini, Codex, Copilot, Cursor).
+
+Or use the MCP `setup_project` tool if the agents-config server is connected:
+"Call setup_project with project_path set to this project's root."
+```
+
+---
+
+## Understanding the Config Files
+
+Each AI assistant reads a different file, and **they should NOT all be identical copies**. Each file should be tailored to that assistant's capabilities.
+
+### File Purposes
+
+| File | Assistant | Skills? | Subagents? | Key Differences |
+|------|-----------|---------|------------|-----------------|
+| `AGENTS.md` | Codex (OpenAI) | Yes | Partial | Source of truth. Generic format all assistants understand. |
+| `CLAUDE.md` | Claude Code | Yes | Yes (Task tool) | Can reference Task tool, MCP tools, progressive disclosure, `allowed-tools` directives. Most capable. |
+| `GEMINI.md` | Gemini CLI | Yes | Partial | Adapt for Gemini's conventions and tool capabilities. |
+| `.cursorrules` | Cursor | No | No | Include all rules inline. Keep concise — Cursor has token limits. No skill references. |
+| `.github/copilot-instructions.md` | GitHub Copilot | No | No | Focus on code conventions and patterns. No skill references. |
+
+### How to Differentiate
+
+Start from `AGENTS.md` as the base, then customize:
+
+- **CLAUDE.md** — Add sections on: how to use Task tool for spawning subagents, MCP tool integration, skill progressive disclosure patterns, allowed-tools per skill.
+- **GEMINI.md** — Similar to Claude but adapted for Gemini CLI syntax and capabilities.
+- **.cursorrules** — Strip out skill references and subagent sections. Inline the most critical rules and patterns. Prioritize brevity.
+- **copilot-instructions.md** — Strip out skills. Focus on naming conventions, code patterns, and common operations.
+
+### Subfolder AGENTS.md Files
+
+For projects with distinct components (monorepos, multi-service architectures), create scoped config files:
+
+```
+project/
+├── AGENTS.md              # Root — cross-project norms
+├── api/AGENTS.md          # API-specific rules, tech stack, commands
+├── ui/AGENTS.md           # Frontend-specific patterns, components
+└── shared/AGENTS.md       # Shared library conventions
+```
+
+**Purpose**: When an AI subagent works inside `api/`, it reads `api/AGENTS.md` for focused, component-specific guidance. This prevents token waste from loading irrelevant frontend rules.
+
+**When to create**:
+- Each folder has a different tech stack (e.g., Python API + React UI)
+- Components have distinct commands (different test/lint/dev commands)
+- Team conventions differ per component
+- The codebase is large enough that root-level guidance is too generic
+
+**Rule**: Component AGENTS.md overrides root when guidance conflicts. Root defines shared norms; components define specifics.
+
+Use `COMPONENT-AGENTS.md.template` as the base for each subfolder config.
+
+---
+
+## Using Subagents to Solve Tickets
+
+A primary use case for skills and AGENTS.md is enabling AI to **solve tickets autonomously** using subagents. Each subagent reads the relevant AGENTS.md (root or component-scoped) and follows the project's conventions.
+
+### Ticket-Solving Workflow
+
+```
+User: "Solve ticket PROJ-123: Add rate limiting to the API"
+
+Root Agent (reads CLAUDE.md):
+├── 1. Fetch ticket details (via MCP tool or user description)
+├── 2. Analyze scope: which components are affected?
+├── 3. Spawn subagents per component:
+│   ├── Subagent A (reads api/AGENTS.md):
+│   │   ├── Activates relevant skills (e.g., api-patterns, testing)
+│   │   ├── Implements the feature following component conventions
+│   │   └── Writes tests following the QA checklist
+│   └── Subagent B (reads shared/AGENTS.md):
+│       └── Updates shared types/interfaces if needed
+├── 4. Root agent reviews all changes for consistency
+├── 5. Runs tests, linting, validation
+└── 6. Updates ticket status (via MCP tool)
+```
+
+### What Makes This Work
+
+- **AGENTS.md** tells the agent *what conventions to follow* and *what commands to run*
+- **Skills** give the agent *how-to knowledge* for specific patterns (loaded on demand)
+- **Subfolder AGENTS.md** scopes the agent to the right component context
+- **MCP tools** let the agent interact with external systems (Linear, GitHub, etc.)
+
+### Recommended Skills for Ticket Workflows
+
+When setting up a project for ticket-solving, consider creating these skills:
+
+| Skill | Purpose |
+|-------|---------|
+| `ticket-creator` | Creates tickets with correct labels, estimates, formatting |
+| `{project}-{component}` | Component-specific patterns and conventions |
+| `testing` | Testing patterns for the project's test framework |
+| `deployment` | Deployment procedures and checklists |
+
+The generic `ticket-creator` skill template is available at `templates/skills/ticket-creator/`.
+
+### Defining Subagent Roles in CLAUDE.md
+
+In your CLAUDE.md, define specialist subagent roles that match your team structure:
+
+```markdown
+## Subagents
+
+### FeatureBuilder
+- **Role**: Implements features following project conventions
+- **Context**: Reads component AGENTS.md + activates relevant skills
+- **Tools**: read, write, edit, bash (restricted to dev/test commands)
+- **Cannot**: Modify CI/CD, push to main, deploy
+
+### CodeReviewer
+- **Role**: Reviews changes for correctness and convention compliance
+- **Context**: Reads root AGENTS.md + QA checklist
+- **Tools**: read, grep, glob (read-only)
+- **Cannot**: Modify files
+
+### TestRunner
+- **Role**: Writes and runs tests for new changes
+- **Context**: Reads component AGENTS.md + testing skill
+- **Tools**: read, write, bash (test commands only)
+- **Cannot**: Modify production code
 ```
 
 ---

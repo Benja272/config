@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "agents-config": {
+      "command": "node",
+      "args": ["mcp-server/dist/index.js"]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-.PHONY: setup setup-all sync check test help clean
+.PHONY: setup setup-all sync check test help clean mcp-build mcp-dev mcp-test mcp-install
 
 help:
 	@echo "AI Agents Config - Available commands:"
@@ -9,6 +9,12 @@ help:
 	@echo "  make check      - Check if AGENTS.md files are in sync (for CI)"
 	@echo "  make test       - Run all tests"
 	@echo "  make clean      - Remove generated files"
+	@echo ""
+	@echo "MCP Server:"
+	@echo "  make mcp-build   - Build MCP server TypeScript"
+	@echo "  make mcp-dev     - Run MCP server in dev mode with watch"
+	@echo "  make mcp-test    - Run MCP server tests"
+	@echo "  make mcp-install - Install MCP server dependencies"
 	@echo ""
 
 setup:
@@ -39,3 +45,16 @@ clean:
 	rm -rf .codex/skills
 	rm -f .github/copilot-instructions.md
 	@echo "Cleaned generated files"
+
+# MCP Server
+mcp-build:
+	cd mcp-server && npm run build
+
+mcp-dev:
+	cd mcp-server && npm run dev
+
+mcp-test:
+	cd mcp-server && npm test
+
+mcp-install:
+	cd mcp-server && npm install
