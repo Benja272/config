@@ -13,7 +13,6 @@ Use these skills for detailed patterns on-demand:
 ### Generic Skills
 | Skill | Description | URL |
 |-------|-------------|-----|
-| `typescript` | TypeScript strict patterns and best practices | [SKILL.md](skills/typescript/SKILL.md) |
 | `{skill-name}` | {description} | [SKILL.md](skills/{skill-name}/SKILL.md) |
 
 ### Project-Specific Skills
@@ -27,7 +26,6 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 | Action | Skill |
 |--------|-------|
-| Writing TypeScript types/interfaces | `typescript` |
 | Creating new skills | `skill-creator` |
 | After creating/modifying a skill | `skill-sync` |
 | {action description} | `{skill-name}` |

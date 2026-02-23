@@ -21,6 +21,13 @@ import {
   resolveScopePath,
 } from "./utils/skills.js";
 import { ASSISTANT_CONFIG_DIRS, syncSkillSymlinks } from "./utils/symlinks.js";
+import {
+  loadProjectConfig,
+  writeProjectConfig,
+  resolveAssistants,
+  CONFIG_FILENAME,
+  type ProjectConfig,
+} from "./utils/config.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -259,6 +266,7 @@ export function registerTools(server: McpServer): void {
       const dryRun = args.dry_run;
 
       const operations: string[] = [];
+      await ensureDir(projectPath);
 
       // Step 1: Apply AGENTS.md template
       const agentsMdContent = await applyTemplate("AGENTS.md.template", {
@@ -268,10 +276,29 @@ export function registerTools(server: McpServer): void {
 
       if (dryRun) {
         operations.push(`CREATE ${agentsMdPath}`);
+      } else if (await exists(agentsMdPath)) {
+        operations.push(`SKIPPED ${agentsMdPath} (already exists)`);
       } else {
-        await ensureDir(projectPath);
         await writeFile(agentsMdPath, agentsMdContent, "utf-8");
         operations.push(`CREATED ${agentsMdPath}`);
+      }
+
+      // Step 1b: Write .agents-config.json
+      const projectConfig: ProjectConfig = {
+        project_name: projectName,
+        assistants,
+        license: "MIT",
+        author: projectName,
+      };
+      const configPath = join(projectPath, CONFIG_FILENAME);
+
+      if (dryRun) {
+        operations.push(`CREATE ${configPath}`);
+      } else if (await exists(configPath)) {
+        operations.push(`SKIPPED ${configPath} (already exists)`);
+      } else {
+        await writeProjectConfig(projectPath, projectConfig);
+        operations.push(`CREATED ${configPath}`);
       }
 
       // Step 2: Copy base skills
@@ -282,6 +309,8 @@ export function registerTools(server: McpServer): void {
 
         if (dryRun) {
           operations.push(`COPY ${srcDir} -> ${destDir} (recursive)`);
+        } else if (await exists(destDir)) {
+          operations.push(`SKIPPED ${destDir} (already exists)`);
         } else {
           const copied = await copyDirRecursive(srcDir, destDir);
           for (const f of copied) {
@@ -313,6 +342,8 @@ export function registerTools(server: McpServer): void {
 
         if (dryRun) {
           operations.push(`COPY AGENTS.md -> ${destPath} (for ${assistant})`);
+        } else if (await exists(destPath)) {
+          operations.push(`SKIPPED ${destPath} (already exists)`);
         } else {
           await ensureDir(join(destPath, ".."));
           await writeFile(destPath, agentsMdContent, "utf-8");
@@ -357,6 +388,10 @@ export function registerTools(server: McpServer): void {
         .array(z.string())
         .optional()
         .describe("Actions that trigger auto-invocation of this skill"),
+      assistants: z
+        .array(z.enum(["claude", "gemini", "codex", "copilot", "cursor"]))
+        .optional()
+        .describe("Which assistants to create symlinks for (defaults to .agents-config.json, then all)"),
       dry_run: z
         .boolean()
         .optional()
@@ -374,6 +409,10 @@ export function registerTools(server: McpServer): void {
         dry_run: dryRun,
       } = args;
 
+      // Load project config for defaults
+      const config = await loadProjectConfig(projectPath);
+      const resolvedAssistants = resolveAssistants(args.assistants, config);
+
       // Step 1: Apply SKILL.md template with placeholder replacements
       const templateContent = await applyTemplate("SKILL.md.template", {
         "skill-name": skillName,
@@ -383,6 +422,7 @@ export function registerTools(server: McpServer): void {
       const parsed = matter(templateContent);
       parsed.data.name = skillName;
       parsed.data.description = `${description}\nTrigger: ${trigger}`;
+      parsed.data.license = config?.license ?? "MIT";
 
       if (!parsed.data.metadata || typeof parsed.data.metadata !== "object") {
         parsed.data.metadata = {};
@@ -391,6 +431,9 @@ export function registerTools(server: McpServer): void {
       metadata.scope = scope;
       if (autoInvoke && autoInvoke.length > 0) {
         metadata.auto_invoke = autoInvoke;
+      }
+      if (config?.author) {
+        metadata.author = config.author;
       }
 
       const finalContent = matter.stringify(parsed.content, parsed.data);
@@ -401,10 +444,11 @@ export function registerTools(server: McpServer): void {
       const assetsDir = join(skillDir, "assets");
 
       if (dryRun) {
+        const symlinkAssistants = resolvedAssistants.filter((a) => a in ASSISTANT_CONFIG_DIRS);
         const operations = [
           `CREATE ${skillMdPath}`,
           `CREATE ${assetsDir}/`,
-          `SYMLINK sync for all assistants`,
+          `SYMLINK sync for: ${symlinkAssistants.join(", ")}`,
         ];
         const summary = [
           `[DRY RUN] Skill "${skillName}" creation plan:`,
@@ -418,6 +462,8 @@ export function registerTools(server: McpServer): void {
           `  trigger: ${trigger}`,
           `  scope: ${JSON.stringify(scope)}`,
           `  auto_invoke: ${JSON.stringify(autoInvoke ?? [])}`,
+          `  license: ${config?.license ?? "MIT"}`,
+          `  author: ${config?.author ?? "(template default)"}`,
         ].join("\n");
 
         return {
@@ -431,8 +477,8 @@ export function registerTools(server: McpServer): void {
       // Step 4: Create assets directory
       await ensureDir(assetsDir);
 
-      // Step 5: Sync symlinks for all symlink-capable assistants
-      const symlinkAssistants = Object.keys(ASSISTANT_CONFIG_DIRS);
+      // Step 5: Sync symlinks for configured assistants
+      const symlinkAssistants = resolvedAssistants.filter((a) => a in ASSISTANT_CONFIG_DIRS);
       const syncResults = await syncSkillSymlinks(projectPath, symlinkAssistants);
 
       const syncSummary: string[] = [];
@@ -474,6 +520,10 @@ export function registerTools(server: McpServer): void {
         .string()
         .optional()
         .describe("If provided, only sync this specific scope (e.g. 'root', 'src/api')"),
+      assistants: z
+        .array(z.enum(["claude", "gemini", "codex", "copilot", "cursor"]))
+        .optional()
+        .describe("Which assistants to sync symlinks for (defaults to .agents-config.json, then all)"),
       dry_run: z
         .boolean()
         .optional()
@@ -487,6 +537,10 @@ export function registerTools(server: McpServer): void {
         scope: filterScope,
         dry_run: dryRun,
       } = args;
+
+      // Load project config for assistant defaults
+      const config = await loadProjectConfig(projectPath);
+      const resolvedAssistants = resolveAssistants(args.assistants, config);
 
       // Step 1: Collect skills grouped by scope
       const skillsByScope = await collectSkillsByScope(projectPath);
@@ -557,7 +611,7 @@ export function registerTools(server: McpServer): void {
 
       // Step 4: Sync symlinks (unless check-only)
       if (!checkOnly) {
-        const symlinkAssistants = Object.keys(ASSISTANT_CONFIG_DIRS);
+        const symlinkAssistants = resolvedAssistants.filter((a) => a in ASSISTANT_CONFIG_DIRS);
 
         if (dryRun) {
           results.push(`[DRY RUN] Would sync symlinks for: ${symlinkAssistants.join(", ")}`);
@@ -606,6 +660,10 @@ export function registerTools(server: McpServer): void {
       const report: string[] = [];
       const updates: string[] = [];
 
+      // Load project config for assistant defaults
+      const config = await loadProjectConfig(projectPath);
+      const resolvedAssistants = resolveAssistants(undefined, config);
+
       // ── Check available skills vs project skills ────────────────────
       const sourceSkillsDir = join(ASSETS_ROOT, "templates", "skills");
       const availableSkills = await getSkillDirectories(sourceSkillsDir);
@@ -641,9 +699,13 @@ export function registerTools(server: McpServer): void {
       const agentsMdExists = await exists(agentsMdPath);
       report.push(`  AGENTS.md:          ${agentsMdExists ? "present" : "MISSING"}`);
 
+      // Only check assistants that are configured
+      const relevantAssistantFiles = Object.entries(ASSISTANT_FILE_MAP)
+        .filter(([assistant]) => resolvedAssistants.includes(assistant));
+
       const missingAssistantFiles: string[] = [];
 
-      for (const [assistant, relPath] of Object.entries(ASSISTANT_FILE_MAP)) {
+      for (const [assistant, relPath] of relevantAssistantFiles) {
         const filePath = join(projectPath, relPath);
         const fileExists = await exists(filePath);
         report.push(`  ${assistant} (${relPath}): ${fileExists ? "present" : "MISSING"}`);
@@ -656,7 +718,10 @@ export function registerTools(server: McpServer): void {
       report.push("");
       report.push("## Symlinks");
 
-      for (const [assistant, configDir] of Object.entries(ASSISTANT_CONFIG_DIRS)) {
+      const relevantSymlinkAssistants = Object.entries(ASSISTANT_CONFIG_DIRS)
+        .filter(([assistant]) => resolvedAssistants.includes(assistant));
+
+      for (const [assistant, configDir] of relevantSymlinkAssistants) {
         const fullConfigDir = join(projectPath, configDir);
         const configDirExists = await exists(fullConfigDir);
         if (!configDirExists) {
@@ -695,8 +760,8 @@ export function registerTools(server: McpServer): void {
           }
         }
 
-        // Sync symlinks
-        const symlinkAssistants = Object.keys(ASSISTANT_CONFIG_DIRS);
+        // Sync symlinks for configured assistants
+        const symlinkAssistants = resolvedAssistants.filter((a) => a in ASSISTANT_CONFIG_DIRS);
         const syncResults = await syncSkillSymlinks(projectPath, symlinkAssistants);
         for (const [assistant, result] of Object.entries(syncResults)) {
           if (result.status !== "unchanged") {

@@ -3,10 +3,13 @@ name: skill-creator
 description: >
   Creates new AI agent skills following the Agent Skills spec.
   Trigger: When user asks to create a new skill, add agent instructions, or document patterns for AI.
-license: Apache-2.0
+license: MIT
 metadata:
-  author: gentleman-programming
   version: "1.0"
+  scope: [root]
+  auto_invoke:
+    - "Creating new skills"
+    - "Adding agent instructions or patterns"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, WebFetch, WebSearch, Task
 ---
 
@@ -47,9 +50,9 @@ name: {skill-name}
 description: >
   {One-line description of what this skill does}.
   Trigger: {When the AI should load this skill}.
-license: Apache-2.0
+license: MIT
 metadata:
-  author: gentleman-programming
+  author: "{your-name}"
   version: "1.0"
 ---
 
@@ -84,9 +87,9 @@ metadata:
 | Type | Pattern | Examples |
 |------|---------|----------|
 | Generic skill | `{technology}` | `pytest`, `playwright`, `typescript` |
-| Prowler-specific | `prowler-{component}` | `prowler-api`, `prowler-ui`, `prowler-sdk-check` |
-| Testing skill | `prowler-test-{component}` | `prowler-test-sdk`, `prowler-test-api` |
-| Workflow skill | `{action}-{target}` | `skill-creator`, `jira-task` |
+| Project-specific | `{project}-{component}` | `myapp-api`, `myapp-ui`, `myapp-auth` |
+| Testing skill | `{project}-test-{component}` | `myapp-test-api`, `myapp-test-sdk` |
+| Workflow skill | `{action}-{target}` | `skill-creator`, `ticket-creator` |
 
 ---
 
@@ -100,16 +103,16 @@ Link to existing docs?      → references/
 Link to external guides?    → references/ (with local path)
 ```
 
-**Key Rule**: `references/` should point to LOCAL files (`docs/developer-guide/*.mdx`), not web URLs.
+**Key Rule**: `references/` should point to LOCAL files (e.g., `docs/*.md`), not web URLs.
 
 ---
 
-## Decision: Prowler-Specific vs Generic
+## Decision: Project-Specific vs Generic
 
 ```
-Patterns apply to ANY project?     → Generic skill (e.g., pytest, typescript)
-Patterns are Prowler-specific?     → prowler-{name} skill
-Generic skill needs Prowler info?  → Add references/ pointing to Prowler docs
+Patterns apply to ANY project?       → Generic skill (e.g., pytest, typescript)
+Patterns are project-specific?       → {project}-{name} skill
+Generic skill needs project info?    → Add references/ pointing to project docs
 ```
 
 ---
@@ -120,9 +123,11 @@ Generic skill needs Prowler info?  → Add references/ pointing to Prowler docs
 |-------|----------|-------------|
 | `name` | Yes | Skill identifier (lowercase, hyphens) |
 | `description` | Yes | What + Trigger in one block |
-| `license` | Yes | Always `Apache-2.0` for Prowler |
-| `metadata.author` | Yes | `gentleman-programming` |
+| `license` | Yes | Project license (e.g., `MIT`, `Apache-2.0`) |
+| `metadata.author` | Yes | Team or individual name |
 | `metadata.version` | Yes | Semantic version as string |
+| `metadata.scope` | Yes | Which AGENTS.md files to update (e.g., `[root]`, `[root, api]`) |
+| `metadata.auto_invoke` | Yes | Actions that trigger this skill |
 
 ---
 

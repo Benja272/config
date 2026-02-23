@@ -40,7 +40,7 @@ setup_test_env() {
     mkdir -p "$TEST_DIR/skills/skill-sync/assets"
     mkdir -p "$TEST_DIR/ui"
     mkdir -p "$TEST_DIR/api"
-    mkdir -p "$TEST_DIR/prowler"
+    mkdir -p "$TEST_DIR/sdk"
 
     # Create mock SKILL.md files with metadata
     cat > "$TEST_DIR/skills/mock-ui-skill/SKILL.md" << 'EOF'
@@ -165,7 +165,7 @@ EOF
 API rules here.
 EOF
 
-    cat > "$TEST_DIR/prowler/AGENTS.md" << 'EOF'
+    cat > "$TEST_DIR/sdk/AGENTS.md" << 'EOF'
 # SDK AGENTS
 
 > **Skills Reference**: For detailed patterns, use these skills:
@@ -350,9 +350,9 @@ test_generate_correct_skill_in_api() {
 
 test_generate_correct_skill_in_sdk() {
     run_sync > /dev/null
-    assert_file_contains "$TEST_DIR/prowler/AGENTS.md" "mock-sdk-skill" \
+    assert_file_contains "$TEST_DIR/sdk/AGENTS.md" "mock-sdk-skill" \
         "SDK AGENTS should contain mock-sdk-skill" && \
-    assert_file_not_contains "$TEST_DIR/prowler/AGENTS.md" "mock-ui-skill" \
+    assert_file_not_contains "$TEST_DIR/sdk/AGENTS.md" "mock-ui-skill" \
         "SDK AGENTS should not contain mock-ui-skill"
 }
 
@@ -475,9 +475,8 @@ test_update_replaces_existing_section() {
     # First run creates section
     run_sync > /dev/null
 
-    # Modify a skill's auto_invoke (portable: BSD/GNU sed)
-    # macOS/BSD sed needs -i '' (separate arg). GNU sed accepts it too.
-    sed -i '' 's/Testing UI components/Modified UI action/' "$TEST_DIR/skills/mock-ui-skill/SKILL.md"
+    # Modify a skill's auto_invoke (portable: works on both BSD and GNU sed)
+    sed -i 's/Testing UI components/Modified UI action/' "$TEST_DIR/skills/mock-ui-skill/SKILL.md"
 
     # Second run should replace
     run_sync > /dev/null

@@ -3,9 +3,9 @@ name: {skill-name}
 description: >
   {Brief description of what this skill enables}.
   Trigger: {When the AI should load this skill - be specific}.
-license: Apache-2.0
+license: MIT
 metadata:
-  author: gentleman-programming
+  author: "{author}"
   version: "1.0"
 ---
 

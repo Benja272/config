@@ -63,14 +63,11 @@ CHANGES_NEEDED=0
 # Map scope to AGENTS.md path
 get_agents_path() {
     local scope="$1"
-    case "$scope" in
-        root)       echo "$REPO_ROOT/AGENTS.md" ;;
-        ui)         echo "$REPO_ROOT/ui/AGENTS.md" ;;
-        api)        echo "$REPO_ROOT/api/AGENTS.md" ;;
-        sdk)        echo "$REPO_ROOT/prowler/AGENTS.md" ;;
-        mcp_server) echo "$REPO_ROOT/mcp_server/AGENTS.md" ;;
-        *)          echo "" ;;
-    esac
+    if [ "$scope" = "root" ]; then
+        echo "$REPO_ROOT/AGENTS.md"
+    else
+        echo "$REPO_ROOT/$scope/AGENTS.md"
+    fi
 }
 
 # Extract YAML frontmatter field using awk

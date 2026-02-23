@@ -3,9 +3,8 @@ name: skill-sync
 description: >
   Syncs skill metadata to AGENTS.md Auto-invoke sections.
   Trigger: When updating skill metadata (metadata.scope/metadata.auto_invoke), regenerating Auto-invoke tables, or running ./skills/skill-sync/assets/sync.sh (including --dry-run/--scope).
-license: Apache-2.0
+license: MIT
 metadata:
-  author: prowler-cloud
   version: "1.0"
   scope: [root]
   auto_invoke:
@@ -27,9 +26,8 @@ Each skill that should appear in Auto-invoke sections needs these fields in `met
 
 ```yaml
 metadata:
-  author: prowler-cloud
   version: "1.0"
-  scope: [ui]                                    # Which AGENTS.md: ui, api, sdk, root
+  scope: [ui]                                    # Which AGENTS.md to update (scope = directory name)
 
   # Option A: single action
   auto_invoke: "Creating/modifying components"
@@ -42,15 +40,16 @@ metadata:
 
 ### Scope Values
 
+Scopes map to directories by convention: the scope name is the directory containing `AGENTS.md`.
+
 | Scope | Updates |
 |-------|---------|
 | `root` | `AGENTS.md` (repo root) |
-| `ui` | `ui/AGENTS.md` |
-| `api` | `api/AGENTS.md` |
-| `sdk` | `prowler/AGENTS.md` |
-| `mcp_server` | `mcp_server/AGENTS.md` |
+| `{directory}` | `{directory}/AGENTS.md` |
 
-Skills can have multiple scopes: `scope: [ui, api]`
+Examples: `scope: [root]`, `scope: [ui, api]`, `scope: [src/core]`
+
+Skills can have multiple scopes: `scope: [root, api]`
 
 ---
 
@@ -69,6 +68,10 @@ Skills can have multiple scopes: `scope: [ui, api]`
 3. Generates Auto-invoke tables for each AGENTS.md
 4. Updates the `### Auto-invoke Skills` section in each file
 
+### Managed Sections
+
+The `### Auto-invoke Skills` section in AGENTS.md is **fully managed** by the sync process. Any manual edits to this section will be overwritten on the next sync run. To customize which skills appear, modify the skill's `metadata.scope` and `metadata.auto_invoke` fields instead.
+
 ---
 
 ## Example
@@ -76,9 +79,8 @@ Skills can have multiple scopes: `scope: [ui, api]`
 Given this skill metadata:
 
 ```yaml
-# skills/prowler-ui/SKILL.md
+# skills/myapp-ui/SKILL.md
 metadata:
-  author: prowler-cloud
   version: "1.0"
   scope: [ui]
   auto_invoke: "Creating/modifying React components"
@@ -93,7 +95,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 | Action | Skill |
 |--------|-------|
-| Creating/modifying React components | `prowler-ui` |
+| Creating/modifying React components | `myapp-ui` |
 ```
 
 ---
